@@ -53,7 +53,9 @@ ui <- fluidPage(
       fileInput("file", "Select a file"),
       numericInput("num", "Maximum number of words",
                    value = 100, min = 5),
-      colourInput("col", "Background colour", value = "white")
+      colourInput("col", "Background colour", value = "white"),
+      # Add a "draw" button to the app
+      actionButton(inputId = "draw", label = "Draw!")
     ),
     mainPanel(
       wordcloud2Output("cloud")
@@ -83,9 +85,16 @@ server <- function(input, output) {
   })
   
   output$cloud <- renderWordcloud2({
-    # Use the data_source reactive variable as the word cloud data source
-    create_wordcloud(data = data_source(), num_words = input$num,
-                     background = input$col)
+    # Add the draw button as a dependency to
+    # cause the word cloud to re-render on click
+    input$draw
+    # Isolate the code to render the word cloud so that it will
+    # not automatically re-render on every parameter change
+    isolate({
+      # Use the data_source reactive variable as the word cloud data source
+      create_wordcloud(data = data_source(), num_words = input$num,
+                       background = input$col)
+    })
   })
 }
 
